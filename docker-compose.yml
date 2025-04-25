@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: leave_management_system
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/your_db
+      - SPRING_DATASOURCE_USERNAME=your_username
+      - SPRING_DATASOURCE_PASSWORD=your_password
+      - SPRING_REDIS_HOST=redis
+      - SPRING_REDIS_PORT=6379
+      - JWT_SECRET=your-very-strong-secret-key-is-32charss
+      - JWT_EXPIRATION=86400000
+    ports:
+      - "8080:8080"
+    networks:
+      - leave-network
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15
+    container_name: my_postgres
+    environment:
+      - POSTGRES_USER=your_username
+      - POSTGRES_PASSWORD=your_password
+      - POSTGRES_DB=your_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - leave-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: leavesystem_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - leave-network
+    restart: unless-stopped
+
+networks:
+  leave-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  redis-data:
